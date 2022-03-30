@@ -5,6 +5,7 @@ namespace App\Http;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use App\Http\Middleware\IsAdmin;
 use App\Http\Middleware\IsMember;
+use App\Http\Middleware\IsKycVerified;
 
 class Kernel extends HttpKernel
 {
@@ -56,8 +57,9 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $routeMiddleware = [
-        'admin' => \App\Http\Middleware\IsAdmin::class,
-        'member' => \App\Http\Middleware\IsMember::class,
+        'admin' => IsAdmin::class,
+        'member' => IsMember::class,
+        'kycVerified' => IsKycVerified::class,
         'auth' => \App\Http\Middleware\Authenticate::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'bindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,

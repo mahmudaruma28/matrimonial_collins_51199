@@ -95,10 +95,7 @@ if (!function_exists('getFileBaseURL')) {
 
 function translate($key, $lang = null)
 {
-    if($lang == null){
-        $lang = App::getLocale();
-    }
-
+    $lang = Session::get('locale') != null ? Session::get('locale') : 'en';
     $lang_key = preg_replace('/[^A-Za-z0-9\_]/', '', str_replace(' ', '_', strtolower($key)));
 
     $translations_default = Cache::rememberForever('translations-'.env('DEFAULT_LANGUAGE', 'en'), function () {

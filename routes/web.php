@@ -69,7 +69,10 @@ Route::group(['middleware' => ['member','verified']], function(){
     Route::post('/new-user-email', 'HomeController@update_email')->name('user.change.email');
     Route::post('/new-user-verification', 'HomeController@new_verify')->name('user.new.verify');
 
-
+    // KYC verification
+    Route::get('/kyc-verification', 'MemberController@kyc_verification')->name('kyc_verification');
+    Route::post('/kyc-verification/store', 'MemberController@kyc_verification_info_store')->name('kyc_verification_info_store');
+    
     Route::get('/profile-settings', 'MemberController@profile_settings')->name('profile_settings');
     Route::get('/package-payment-methods/{id}', 'PackageController@package_payemnt_methods')->name('package_payment_methods');
     Route::post('/package-payment','PackagePaymentController@store')->name('package.payment');
@@ -82,51 +85,52 @@ Route::group(['middleware' => ['member','verified']], function(){
     Route::get('/members/change-password', 'MemberController@change_password')->name('member.change_password');
     Route::post('/member/password-update/{id}', 'MemberController@password_update')->name('member.password_update');
 
-    // Gallery Image
-    Route::resource('/gallery-image', 'GalleryImageController');
-    Route::get('/gallery_image/destroy/{id}','GalleryImageController@destroy')->name('gallery_image.destroy');
+    Route::group(['middleware' => ['kycVerified']], function(){
+        // Gallery Image
+        Route::resource('/gallery-image', 'GalleryImageController');
+        Route::get('/gallery_image/destroy/{id}','GalleryImageController@destroy')->name('gallery_image.destroy');
 
+        // Express Interest
+        Route::resource('/express-interest', 'ExpressInterestController');
+        Route::get('/my-interests', 'ExpressInterestController@index')->name('my_interests.index');
+        Route::get('/interest/requests', 'ExpressInterestController@interest_requests')->name('interest_requests');
+        Route::post('/interest/accept', 'ExpressInterestController@accept_interest')->name('accept_interest');
+        Route::post('/interest/reject', 'ExpressInterestController@reject_interest')->name('reject_interest');
+
+        // Chat
+        Route::get('/chat', 'ChatController@index')->name('all.messages');
+        Route::get('/single-chat/{id}', 'ChatController@chat_view')->name('chat_view');
+        Route::post('/chat-reply', 'ChatController@chat_reply')->name('chat.reply');
+        Route::get('/chat/refresh/{id}', 'ChatController@chat_refresh')->name('chat_refresh');
+        Route::post('/chat/old-messages', 'ChatController@get_old_messages')->name('get-old-message');
+
+
+        // ShortList list, Add, Remove
+        Route::get('/my-shortlists', 'ShortlistController@index')->name('my_shortlists');
+        Route::post('/member/add-to-shortlist', 'ShortlistController@create')->name('member.add_to_shortlist');
+        Route::post('/member/remove-from-shortlist', 'ShortlistController@remove')->name('member.remove_from_shortlist');
+
+        // Ignore list, Add, Remove
+        Route::get('/ignored-list', 'IgnoredUserController@index')->name('my_ignored_list');
+        Route::post('/member/add-to-ignore-list', 'IgnoredUserController@add_to_ignore_list')->name('member.add_to_ignore_list');
+        Route::post('/member/remove-from-ignored-list', 'IgnoredUserController@remove_from_ignored_list')->name('member.remove_from_ignored_list');
+
+        // Profile_picture view request 
+        Route::resource('/profile-picture-view-request', 'ViewProfilePictureController');
+        Route::post('/profile-picture-view-request/accept', 'ViewProfilePictureController@accept_request')->name('profile_picture_view_request_accept');
+        Route::post('/profile-picture-view-request/reject', 'ViewProfilePictureController@reject_request')->name('profile_picture_view_request_reject');
+
+        // Gallery Image View Request
+        Route::resource('/gallery-image-view-request', 'ViewGalleryImageController');
+        Route::post('/gallery-image-view-request/accept', 'ViewGalleryImageController@accept_request')->name('gallery_image_view_request_accept');
+        Route::post('/gallery-image-view-request/reject', 'ViewGalleryImageController@reject_request')->name('gallery_image_view_request_reject');
+
+        Route::resource('reportusers', 'ReportedUserController');
+        Route::resource('view_contacts', 'ViewContactController');
+    });
+    
     // Account deacticvation
     Route::post('/member/account-activation', 'MemberController@update_account_deactivation_status')->name('member.account_deactivation');
-
-
-    // Express Interest
-    Route::resource('/express-interest', 'ExpressInterestController');
-    Route::get('/my-interests', 'ExpressInterestController@index')->name('my_interests.index');
-    Route::get('/interest/requests', 'ExpressInterestController@interest_requests')->name('interest_requests');
-    Route::post('/interest/accept', 'ExpressInterestController@accept_interest')->name('accept_interest');
-    Route::post('/interest/reject', 'ExpressInterestController@reject_interest')->name('reject_interest');
-
-    // Chat
-    Route::get('/chat', 'ChatController@index')->name('all.messages');
-    Route::get('/single-chat/{id}', 'ChatController@chat_view')->name('chat_view');
-    Route::post('/chat-reply', 'ChatController@chat_reply')->name('chat.reply');
-    Route::get('/chat/refresh/{id}', 'ChatController@chat_refresh')->name('chat_refresh');
-    Route::post('/chat/old-messages', 'ChatController@get_old_messages')->name('get-old-message');
-
-
-    // ShortList list, Add, Remove
-    Route::get('/my-shortlists', 'ShortlistController@index')->name('my_shortlists');
-    Route::post('/member/add-to-shortlist', 'ShortlistController@create')->name('member.add_to_shortlist');
-    Route::post('/member/remove-from-shortlist', 'ShortlistController@remove')->name('member.remove_from_shortlist');
-
-    // Ignore list, Add, Remove
-    Route::get('/ignored-list', 'IgnoredUserController@index')->name('my_ignored_list');
-    Route::post('/member/add-to-ignore-list', 'IgnoredUserController@add_to_ignore_list')->name('member.add_to_ignore_list');
-    Route::post('/member/remove-from-ignored-list', 'IgnoredUserController@remove_from_ignored_list')->name('member.remove_from_ignored_list');
-
-    // Profile_picture view request 
-    Route::resource('/profile-picture-view-request', 'ViewProfilePictureController');
-    Route::post('/profile-picture-view-request/accept', 'ViewProfilePictureController@accept_request')->name('profile_picture_view_request_accept');
-    Route::post('/profile-picture-view-request/reject', 'ViewProfilePictureController@reject_request')->name('profile_picture_view_request_reject');
-
-    // Gallery Image View Request
-    Route::resource('/gallery-image-view-request', 'ViewGalleryImageController');
-    Route::post('/gallery-image-view-request/accept', 'ViewGalleryImageController@accept_request')->name('gallery_image_view_request_accept');
-    Route::post('/gallery-image-view-request/reject', 'ViewGalleryImageController@reject_request')->name('gallery_image_view_request_reject');
-
-    Route::resource('reportusers', 'ReportedUserController');
-    Route::resource('view_contacts', 'ViewContactController');
 
     // Wallet
     Route::get('/wallet', 'WalletController@index')->name('wallet.index');

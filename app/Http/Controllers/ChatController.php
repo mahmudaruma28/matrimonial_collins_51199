@@ -4,11 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ChatThread;
-use App\Models\Project;
 use App\Models\Chat;
 use App\User;
-use App\Models\Role;
-use Session;
 use Auth;
 use Gate;
 
@@ -20,50 +17,57 @@ class ChatController extends Controller
       return view('frontend.member.messages.index', compact('chat_threads'));
     }
 
-    // public function chat_index()
-    // {
-    //
-    // }
-
     public function admin_chat_index(Request $request)
     {
-        if (Gate::allows('user_chat_index')) {
-            $sort_search = null;
-            $chat_threads = ChatThread::orderBy('created_at', 'desc');
-            if ($request->has('search')){
-                $sort_search = $request->search;
-                $user_ids = User::where(function($user) use ($sort_search){
-                    $user->where('name', 'like', '%'.$sort_search.'%')->orWhere('email', 'like', '%'.$sort_search.'%');
-                })->pluck('id')->toArray();
-                $chat_threads = $chat_threads->where(function($chat_thread) use ($user_ids){
-                    $chat_thread->whereIn('sender_user_id', $user_ids)->orWhereIn('receiver_user_id', $user_ids);
-                });
-                $chat_threads = $chat_threads->paginate(10);
-            }
-            else {
-                $chat_threads = $chat_threads->paginate(12);
-            }
-
-
-            return view('admin.chats.index', compact('chat_threads', 'sort_search'));
+        $sort_search = null;
+        $chat_threads = ChatThread::orderBy('created_at', 'desc');
+        if ($request->has('search')){
+            $sort_search = $request->search;
+            $user_ids = User::where(function($user) use ($sort_search){
+                $user->where('first_name', 'like', '%'.$sort_search.'%')->orWhere('last_name', 'like', '%'.$sort_search.'%')->orWhere('email', 'like', '%'.$sort_search.'%');
+            })->pluck('id')->toArray();
+            $chat_threads = $chat_threads->where(function($chat_thread) use ($user_ids){
+                $chat_thread->whereIn('sender_user_id', $user_ids)->orWhereIn('receiver_user_id', $user_ids);
+            });
+            $chat_threads = $chat_threads->paginate(10);
         }
         else {
-            flash('You do not have access permission')->error();
-            return back();
+            $chat_threads = $chat_threads->paginate(10);
         }
+
+        $members = User::latest()->where('user_type','member')->where('blocked',0)->where('deactivated',0)->get();
+        return view('admin.user_chat.index', compact('chat_threads', 'sort_search','members'));
+        
     }
 
-    public function admin_chat_details($id)
+    public function user_chat_create(Request $request)
     {
-        if (Gate::allows('single_user_chat_details')) {
-            $chat_thread = ChatThread::findOrFail(decrypt($id));
-            $chats = $chat_thread->chats;
-            return view('admin.chats.show', compact('chats','chat_thread'));
+        if($request->member1 != $request->member2){
+            $existing_chat_thread =  ChatThread::where('sender_user_id', $request->member1)
+                                                ->where('receiver_user_id', $request->member2)
+                                                ->orWhere(function ($q) use ($request) {
+                                                    $q->where('sender_user_id', $request->member2)->where('receiver_user_id', $request->member1);
+                                                })->first();
+            if ($existing_chat_thread == null){
+                $chat_thread                    = new ChatThread;
+                $chat_thread->thread_code       = $request->member1.date('Ymd').$request->member2;
+                $chat_thread->sender_user_id    = $request->member1;
+                $chat_thread->receiver_user_id  = $request->member2;
+                $chat_thread->save();
+
+                flash(translate('Messaging enabled.'))->success();
+                return back(); 
+            }
+            else{
+                flash(translate('Messaging is alreday enabled between this two members.'))->error();
+                return back(); 
+            }
         }
-        else {
-            flash('You do not have access permission')->error();
+        else{
+            flash(translate('Please select two different member.'))->error();
             return back();
         }
+        
     }
 
     public function chat_view($id)

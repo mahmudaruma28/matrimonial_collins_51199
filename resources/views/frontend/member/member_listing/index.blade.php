@@ -49,8 +49,14 @@
                                         </span>
                                         <div class="px-md-4 p-3 flex-grow-1">
 
-                                            <h2 class="h6 fw-600 fs-18 text-truncate mb-1">
-                                                {{ $user->first_name . ' ' . $user->last_name }}</h2>
+                                            <div class="d-flex align-items-center">
+                                                <h2 class="h6 fw-600 fs-18 text-truncate">
+                                                    {{ $user->first_name . ' ' . $user->last_name }}
+                                                </h2>
+                                                @if($user->kyc_verified == 1)
+                                                    <span class="bg-success size-20px d-flex align-items-center justify-content-center ml-2 rounded-circle mb-1" title="{{ translate('KYC Verifide') }}"><i class="las la-check fs-10 text-white"></i></span>
+                                                @endif
+                                                </div>
                                             <div class="mb-2 fs-12">
                                                 <span class="opacity-60">{{ translate('Member ID: ') }}</span>
                                                 <span class="ml-4 text-primary">{{ $user->code }}</span>
@@ -148,9 +154,12 @@
                                                         }
                                                     @endphp
 
-                                                    <a id="interest_a_id_{{ $user->id }}" @if ($interest_onclick == 1)
+                                                    <a id="interest_a_id_{{ $user->id }}" 
+                                                        @if(Auth::user()->kyc_verified == 0)
+                                                        onclick="kyc_verification_alert()"
+                                                        @elseif($interest_onclick == 1)
                                                         onclick="express_interest({{ $user->id }})"
-                                                    @elseif($interest_onclick == 'do_response')
+                                                        @elseif($interest_onclick == 'do_response')
                                                         href="{{ route('interest_requests') }}"
                                                         @endif
                                                         class="text-reset c-pointer"
@@ -177,9 +186,12 @@
                                                             $shortlist_class = 'text-primary';
                                                         }
                                                     @endphp
-                                                    <a id="shortlist_a_id_{{ $user->id }}" @if ($shortlist_onclick == 1)
+                                                    <a id="shortlist_a_id_{{ $user->id }}" 
+                                                        @if(Auth::user()->kyc_verified == 0)
+                                                        onclick="kyc_verification_alert()"
+                                                        @elseif($shortlist_onclick == 1)
                                                         onclick="do_shortlist({{ $user->id }})"
-                                                    @else
+                                                        @else
                                                         onclick="remove_shortlist({{ $user->id }})"
                                                         @endif
                                                         class="text-reset c-pointer"
@@ -192,7 +204,13 @@
                                                     </a>
                                                 </div>
                                                 <div class="col">
-                                                    <a onclick="ignore_member({{ $user->id }})" class="text-reset c-pointer">
+                                                    <a 
+                                                        @if(Auth::user()->kyc_verified == 0)
+                                                        onclick="kyc_verification_alert()"
+                                                        @else
+                                                        onclick="ignore_member({{ $user->id }})"
+                                                        @endif 
+                                                        class="text-reset c-pointer">
                                                         <span class="text-dark">
                                                             <i class="las la-ban fs-20 text-primary"></i>
                                                             <span class="d-block fs-10 opacity-60">{{ translate('Ignore') }}</span>
@@ -214,7 +232,10 @@
                                                             $report_class = 'text-primary';
                                                         }
                                                     @endphp
-                                                    <a id="report_a_id_{{ $user->id }}" @if ($report_onclick == 1)
+                                                    <a id="report_a_id_{{ $user->id }}" 
+                                                        @if(Auth::user()->kyc_verified == 0)
+                                                        onclick="kyc_verification_alert()"
+                                                        @elseif($report_onclick == 1)
                                                         onclick="report_member({{ $user->id }})"
                                                         @endif
                                                         class="text-reset c-pointer"
@@ -438,6 +459,12 @@
         // Full Profile view
         function package_update_alert() {
             $('.package_update_alert_modal').modal('show');
+        }
+
+        function kyc_verification_alert(){
+            var url = '{{ route("kyc_verification") }}';
+            AIZ.plugins.notify('danger', '{{ translate('Complete your KYC verification first.') }}');
+            location.replace(url);
         }
 
         // Express Interest

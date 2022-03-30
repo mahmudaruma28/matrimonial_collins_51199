@@ -107,14 +107,14 @@ class ExpressInterestController extends Controller
         $interest = ExpressInterest::findOrFail($request->interest_id);
         // $interest->status = 1;
         if($interest->save()){
-        $existing_chat_thread = ChatThread::where('sender_user_id', $interest->interested_by)->where('receiver_user_id', $interest->user_id)->first();
-            if ($existing_chat_thread == null){
-                $chat_thread                    = new ChatThread;
-                $chat_thread->thread_code       = $interest->interested_by.date('Ymd').$interest->user_id;
-                $chat_thread->sender_user_id    = $interest->interested_by;
-                $chat_thread->receiver_user_id  = $interest->user_id;
-                $chat_thread->save();
-            }
+            // $existing_chat_thread = ChatThread::where('sender_user_id', $interest->interested_by)->where('receiver_user_id', $interest->user_id)->first();
+            // if ($existing_chat_thread == null){
+            //     $chat_thread                    = new ChatThread;
+            //     $chat_thread->thread_code       = $interest->interested_by.date('Ymd').$interest->user_id;
+            //     $chat_thread->sender_user_id    = $interest->interested_by;
+            //     $chat_thread->receiver_user_id  = $interest->user_id;
+            //     $chat_thread->save();
+            // }
 
             $notify_user = User::where('id',$interest->interested_by)->first();
 

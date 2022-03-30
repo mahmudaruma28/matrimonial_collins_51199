@@ -38,7 +38,6 @@ class HomeController extends Controller
      */
      public function index()
      {
-
          $members = User::where('user_type','member')
                          ->where('approved', 1)
                          ->where('blocked', 0)

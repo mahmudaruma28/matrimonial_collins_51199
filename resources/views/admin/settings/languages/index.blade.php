@@ -2,7 +2,7 @@
 @section('content')
 
 @can('change_default_language')
-<div class="row">
+{{-- <div class="row">
     <div class="col-lg-6">
         <div class="card">
             <div class="card-header">
@@ -31,10 +31,10 @@
             </div>
         </div>
     </div>
-</div>
+</div> --}}
 @endcan
 <div class="row">
-    <div class="@if(auth()->user()->can('add_languages')) col-lg-7 @else col-lg-12 @endif">
+    <div class="@if(auth()->user()->can('add_languages')) col-lg-12 @else col-lg-12 @endif">
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0 h6">{{translate('All Languages')}}</h5>
@@ -51,9 +51,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @php
-                            $i = 1;
-                        @endphp
                         @foreach ($languages as $key => $language)
                             <tr>
                                 <td>{{ ($key+1) + ($languages->currentPage() - 1)*$languages->perPage() }}</td>
@@ -74,28 +71,28 @@
                                             <i class="las la-language"></i>
                                         </a>
                                     @endcan
-                                    @can('edit_languages')
+                                    {{-- @can('edit_languages')
                                         <a class="btn btn-soft-primary btn-icon btn-circle btn-sm" href="{{route('languages.edit', $language->id)}}" title="{{ translate('Edit') }}">
                                             <i class="las la-edit"></i>
                                         </a>
-                                    @endcan
-                                    @if($language->code != 'en' && auth()->user()->can('delete_languages'))
+                                    @endcan --}}
+                                    {{-- @if($language->code != 'en' && auth()->user()->can('delete_languages'))
                                         <a href="javascript:void(0);" class="btn btn-soft-danger btn-icon btn-circle btn-sm confirm-delete" data-href="{{route('languages.destroy', $language->id)}}" title="{{ translate('Delete') }}">
                                             <i class="las la-trash"></i>
                                         </a>
-                                    @endif
+                                    @endif --}}
                                 </td>
                             </tr>
-                            @php
-                                $i++;
-                            @endphp
                         @endforeach
                     </tbody>
                 </table>
+                <div class="aiz-pagination">
+                    {{ $languages->appends(request()->input())->links() }}
+                </div>
             </div>
         </div>
     </div>
-    @can('add_languages')
+    {{-- @can('add_languages')
     <div class="col-lg-5">
         <div class="card">
             <div class="card-header">
@@ -135,7 +132,7 @@
             </div>
         </div>
     </div>
-    @endcan
+    @endcan --}}
 </div>
 @endsection
 

@@ -2,14 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Symfony\Component\Console\Input\Input;
-use Illuminate\Validation\Rule;
 use App\Models\Language;
 use App\Models\Translation;
 use Illuminate\Http\Request;
 use Validator;
 use Redirect;
 use Cache;
+use Session;
 
 class LanguageController extends Controller
 {
@@ -44,7 +43,7 @@ class LanguageController extends Controller
 
     public function index()
     {
-        $per_page   = 5;
+        $per_page   = 10;
         $languages  = Language::paginate($per_page);
         return view('admin.settings.languages.index', compact('languages','per_page'));
     }

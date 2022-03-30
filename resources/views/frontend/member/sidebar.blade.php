@@ -14,23 +14,11 @@
                 @endif
             </span>
             <h4 class="h5 fw-600">{{ Auth::user()->first_name.' '.Auth::user()->last_name }}</h4>
-            <div class="text-center  mb-2">
-
-            </div>
-            <div>
-                <span class="rating rating-sm">
-
-                </span>
-            </div>
-            <div class="mb-1">
-
-                <span class="fw-600">
-
-                </span>
-                <span>
-
-                </span>
-            </div>
+            @if(Auth::user()->kyc_verified == 1)
+                <div class="text-center mb-2">
+                    <span class="badge badge-inline badge-success">{{ translate('KYC Verified') }}</span>
+                </div>
+            @endif
         </div>
         <div class="text-center mb-3 px-3">
             <a href="{{ route('member_profile', Auth::user()->id) }}" class="btn btn-block btn-soft-primary">{{ translate('Public Profile') }}</a>

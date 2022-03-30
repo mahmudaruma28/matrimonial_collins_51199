@@ -23,6 +23,8 @@ use Redirect;
 use Auth;
 use App\Utility\EmailUtility;
 use App\Utility\SmsUtility;
+use App\Notifications\DbStoreNotification;
+use Notification;
 
 
 
@@ -122,18 +124,18 @@ class MemberController extends Controller
 
         if($request->email == null && $request->phone == null )
         {
-            flash(translate('Email and Phone both can not be null.'));
+            flash(translate('Email and Phone both can not be null.'))->error();
             return back();
         }
 
         if (filter_var($request->email, FILTER_VALIDATE_EMAIL)) {
             if(User::where('email', $request->email)->first() != null){
-                flash(translate('Email or Phone already exists.'));
+                flash(translate('Email or Phone already exists.'))->error();
                 return back();
             }
         }
         elseif (User::where('phone', '+'.$request->country_code.$request->phone)->first() != null) {
-            flash(translate('Phone already exists.'));
+            flash(translate('Phone already exists.'))->error();
             return back();
         }
 
@@ -339,7 +341,6 @@ class MemberController extends Controller
             {
                 EmailUtility::account_approval_email($member);
             }
-
 
             // Account Approval SMS send to member
             if($member->phone && addon_activation('otp_system') && get_sms_template('account_approval','status'))
@@ -610,6 +611,67 @@ class MemberController extends Controller
             return redirect()->route('dashboard');
         }
         flash(translate('Something Went Wrong!'))->error();
+        return back();
+    }
+
+    public function kyc_verification(){
+        return view('frontend.member.kyc_verification');
+    }
+
+    public function kyc_verification_info_store(Request $request){
+        $user = Auth::user();
+        $user->kyc_verification_info = $request->kyc_verification_info;
+        if($user->save())
+        {
+            // KCY Verification Notification for member
+        try{
+            $notify_type = 'kyc_verification_request';
+            $id = unique_notify_id();
+            $notify_by = Auth::user()->id;
+            $info_id = '';
+            $message = translate('New KYC Verification Request');
+            $route = route('kyc_verification_requests');
+
+            Notification::send(User::where('user_type','admin')->first(), new DbStoreNotification($notify_type, $id, $notify_by, $info_id, $message, $route));
+        }
+        catch(\Exception $e){
+            // dd($e);
+        }
+
+            flash(translate('KYC Verification Information Sent Successfully.'))->success();
+            return redirect()->route('dashboard');
+        }
+        flash(translate('Something Went Wrong!'))->error();
+        return back();
+    }
+
+    public function kyc_verification_requests()
+    {
+        $verification_requests = User::where('kyc_verification_info','!=',null)->where('kyc_verified',0)->latest()->paginate(10);
+        return view('admin.members.kyc_verification_request.index', compact('verification_requests'));
+    }
+
+    public function kcy_informations_show_modal(Request $request){
+        $user = User::findOrFail($request->user_id);
+        return view('admin.members.kyc_verification_request.kcy_information_modal', compact('user'));
+    }
+
+    public function key_verification_accept($id)
+    {
+        $user = User::findOrFail($id);
+        $user->kyc_verified = 1;
+        $user->save();
+
+        flash(translate('KYC Verification Request Accepted Successfully.'))->success();
+        return back();
+    }
+
+    public function key_verification_reject($id)
+    {
+        $user = User::findOrFail($id);
+        $user->kyc_verification_info = null;
+        $user->save();
+        flash(translate('KYC Verification Request Rejected.'))->success();
         return back();
     }
 }

@@ -47,8 +47,12 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
     Route::get('/member/unapproved-profile-pictures','MemberController@unapproved_profile_pictures')->name('unapproved_profile_pictures');
     Route::post('/member/approve_profile_image', 'MemberController@approve_profile_image')->name('approve_profile_image');
 
-
-
+    // KCY verification Requests
+    Route::get('/member/kyc_verification_requests','MemberController@kyc_verification_requests')->name('kyc_verification_requests');
+    Route::post('/member/kcy-informations-show-modal', 'MemberController@kcy_informations_show_modal')->name('user.kcy_informations');
+    Route::get('/member/key_verification_accept/{user_id}','MemberController@key_verification_accept')->name('key_verification_accept');
+    Route::get('/member/key_verification_reject/{user_id}','MemberController@key_verification_reject')->name('key_verification_reject');
+    
     // Bulk member
     Route::get('/member-bulk-add/index','MemberBulkAddController@index')->name('member_bulk_add.index');
     Route::get('/download/on-behalf', 'MemberBulkAddController@pdf_download_on_behalf')->name('pdf.on_behalf');
@@ -72,6 +76,10 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'admin']], function 
     // package Payments
     Route::resource('package-payments','PackagePaymentController');
     Route::get('/manual-payment-accept/{id}','PackagePaymentController@manual_payment_accept')->name('manual_payment_accept');
+
+    // User Chats
+    Route::get('/user-chats','ChatController@admin_chat_index')->name('user_chats.index');
+    Route::post('/user-chat-create','ChatController@user_chat_create')->name('user_chat.create');
 
     // Wallet
     Route::get('/wallet-transaction-history', 'WalletController@wallet_transaction_history_admin')->name('wallet_transaction_history_admin');

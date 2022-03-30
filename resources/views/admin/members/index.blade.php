@@ -40,6 +40,7 @@
                                 <th data-breakpoints="md">{{translate('Approval Status')}}</th>
                             @endif
                             <th data-breakpoints="md">{{translate('Profile Reported')}}</th>
+                            <th data-breakpoints="md">{{translate('KCY Verified')}}</th>
                             <th data-breakpoints="md">{{translate('Member Science')}}</th>
                             <th data-breakpoints="md">{{translate('Member Status')}}</th>
                             <th class="text-right">{{translate('Options')}}</th>
@@ -76,6 +77,13 @@
                                   @else
                                     0
                                   @endif
+                                </td>
+                                <td>
+                                    @if($member->kyc_verified == 1)
+                                        <span class="badge badge-inline badge-success">{{translate('Verified')}}</span>
+                                    @else
+                                        <span class="badge badge-inline badge-danger">{{translate('Not Verified')}}</span>
+                                    @endif
                                 </td>
                                 <td>{{ date('d-m-Y', strtotime($member->created_at)) }}</td>
                                 <td>

@@ -12,6 +12,19 @@
             $col++;
         }
     @endphp
+
+    <div class="gutters-5 mb-3">
+        @if ($user->kyc_verified == 0 && $user->kyc_verification_info == null)
+            <div class="alert alert-danger">
+                {{ translate('Please verify your identity') }}. <a href="{{ route('kyc_verification') }}" class="alert-link">{{ translate('Verify Now') }}</a>
+            </div>
+        @elseif($user->kyc_verified == 0 && $user->kyc_verification_info != null)
+            <div class="alert alert-warning">
+                {{ translate('Verification Information Sent. Please wait for the admin verification.') }}</a>
+            </div>
+        @endif
+    </div>
+
     <div class="row gutters-5 row-cols-xl-{{ $col }} row-cols-2">
         <div class="col mx-auto mb-3" >
             <div class="bg-light rounded overflow-hidden text-center p-3">

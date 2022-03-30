@@ -36,6 +36,12 @@
                         </li>
                         @endcan
 
+                        <li class="aiz-side-nav-item">
+                            <a href="{{ route('kyc_verification_requests')}}" class="aiz-side-nav-link">
+                                <span class="aiz-side-nav-text">{{translate('KYC Verification Requests')}}</span>
+                            </a>
+                        </li>
+
                         @can('bulk_member_add')
                         <li class="aiz-side-nav-item">
                             <a href="{{ route('member_bulk_add.index') }}" class="aiz-side-nav-link">
@@ -180,6 +186,13 @@
                     </a>
                 </li>
                 @endcan
+
+                <li class="aiz-side-nav-item ">
+                    <a href="{{ route('user_chats.index') }}" class="aiz-side-nav-link">
+                        <i class="las la-comments aiz-side-nav-icon"></i>
+                        <span class="aiz-side-nav-text">{{translate('User Chats')}}</span>
+                    </a>
+                </li>
 
                 @if(get_setting('wallet_system'))
                     @if(auth()->user()->can('wallet_transaction_history') || auth()->user()->can('offline_wallet_recharge_requests'))
